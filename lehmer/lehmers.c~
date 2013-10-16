@@ -1,0 +1,89 @@
+// TODO: #ifndef
+
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct lehmerset {
+     int64_t a;
+     int64_t m;
+     int64_t streams;
+     int64_t* seeds;
+} lehmerset;
+
+// Initialize the seeds in the lehmer-set
+// TODO: Explicit precondition/postcondition
+void plant_seeds(struct lehmerset* state,  int64_t x0) {
+    // TODO: Protect against leak in seeds field
+    state->seeds = (int64_t*) malloc(sizeof(int64_t) * state->streams);
+    state->seeds[0] = x0;
+    int64_t q = state->m / state->a;
+    int64_t r = state->m % state->a;
+    for (int64_t i=1; i < state->streams; i++) {
+        //printf("Calculating seed %li\n", i);
+        //printf("R: %li\n", r);
+        //printf("Q: %li\n", q);
+        state->seeds[i] = state->a * ( state->seeds[i-1] % q) - r * (state->seeds[i-1] / q);
+
+        if (state->seeds[i] <= 0) {
+            state->seeds[i] += state->m;
+        }
+    }
+}
+
+int64_t calc_aj(int64_t a, int64_t j) {
+    // Calc a**j mod m
+}
+
+int main(int argc, char** argv) {
+    if (argc < 5) {
+        printf("Required args: a j s x0 n\n");
+        exit(1);
+    }
+
+    /*
+    for (int i=0; i < argc; i++) {
+        printf("Arg %i: %s\n", i, argv[i]);
+    }
+    */
+
+    lehmerset state = {
+        .a = atol(argv[1]),
+        .m = LONG_MAX,
+        .streams = atol(argv[3]),
+        .seeds = NULL
+    };
+
+    int is_aj = 0;
+    int show_seeds_only = 0;
+    for (int i=5; i < argc; i++) {
+        if (strcmp(argv[i], "--isaj")) {
+            is_aj = 1;
+        }
+
+        if (strcmp(argv[i], "--seeds")) {
+            show_seeds_only = 1;
+        }
+    }
+
+    if (is_aj) {
+        state.a = calc_aj(state.a, atol(argv[2]));
+    }
+
+
+    /*
+    printf("A is %li\n", state.a);
+    printf("M is %li\n", state.m);
+    printf("X0 is %li\n", atol(argv[4]));
+    */
+
+    plant_seeds(&state, atol(argv[4]));
+
+    if (show_seeds_only) {
+        for (int64_t i=0; i < state.streams; i++) {
+            printf("Seed %li: %li\n", i, state.seeds[i]);
+        }
+    }
+}

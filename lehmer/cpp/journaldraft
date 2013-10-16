@@ -1,0 +1,44 @@
+
+----
+'''Modulus-Compatible Jump Multiplier'''
+
+The book gives the formula for a jump multiplier as:
+
+`a`^j^` % m`
+
+With the proviso that if we want to generate `s` streams, then:
+
+ *j should be as large as possible
+ *j should be less than `floor(m/s)`
+ *`a`^j^` % m` modulus-compatible with m
+
+Calculating the jump multiplier, then, would appear to be non-trivial. Naively, the approach to do this is to calculate `floor(m/s)` and then walk backwards, testing potential jump multipliers as we go. However, intuitively, there should be some s for which `floor(m/s)` is large enough that calculating `a`^j^ will result in integer overflow. (e.g., m = 2^31^-1, a = 48271, s = 2, `floor(m/s)` = ~2^30^, a^j^ would be somewhere around 2^15*1073741824^, well beyond the capability of our 32 bit machine.)
+
+Can we reuse the r+q decomposition trick to calculate it feasibly?
+
+It was previously shown (in class and in text) that we can efficiently calculate, without overflow:
+
+`g(x) = a * x % m`
+
+By containing the overflow in a separate function whose result can computed without evoking overflow.
+
+Suppose we define:
+
+`a`^j^` = `a * y`
+`y = a`^j-1^
+
+Which lets us rewrite:
+
+`g(y=a`^j-1^`) = a * (a`^j-1^`) % m = a`^j^` % m`
+
+So, we can recursively calculate `a`^j^. However, allowing our stack to potentially reach a depth of 1073741824 levels, which would consume ~1GiB of memory with just one byte per frame, is not very feasible. Thus, we need an iterative version of the algorithm.
+
+And yet, that still requires a large amount of iteration for each j we want to investigate.
+
+Maybe we can discover whether `a`^j^` % m` is modulus compatible without actually calculating it.
+
+For modulus compatibility we need `q` and `r`. We then try to show that `r < q`.
+
+`m % (a`^j^`%m) < floor(m/(a`^j^`%m))`
+
+Hmmm...
