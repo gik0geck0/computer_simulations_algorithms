@@ -1,7 +1,5 @@
 #include "lehmerstream.h"
 
-using namespace lehmer;
-
 LehmerStream::LehmerStream(long a, long m, long seed)
 	: a(a), m(m), x(seed), q(m/a), r(m%a){
 	// TODO: If r > q, signal a problem

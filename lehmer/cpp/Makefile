@@ -1,6 +1,10 @@
+lib: lehmer.o
 
-all: lehmerstream.cpp lehmermain.cpp
-	g++ -O0 -g lehmerstream.cpp lehmermain.cpp -o lehmer
+lehmer.o: LehmerPRNG.h LehmerPRNG.cpp
+	g++ -c LehmerPRNG.cpp -o lehmer.o
+	
+test: lehmer.o LehmerTest.cpp
+	g++ LehmerTest.cpp lehmer.o -o lehmerTest
 
 clean:
 	rm lehmer
