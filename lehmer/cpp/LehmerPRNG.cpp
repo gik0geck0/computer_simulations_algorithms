@@ -7,6 +7,8 @@
 
 #include "LehmerPRNG.h"
 
+#include <stdint.h>
+
 /* + LehmerStream */
 
 LehmerStream::LehmerStream(long a, long m, long seed)
@@ -29,7 +31,7 @@ void LehmerStream::putSeed(long seed){
 	x = seed;
 }
 
-long LehmerStream::getSeed(){
+long LehmerStream::getSeed() const{
 	return x;
 }
 
@@ -37,14 +39,33 @@ long LehmerStream::getSeed(){
 
 /* + LehmerSet */
 
-LehmerSet::LehmerSet(long seed) : a(A_DEFAULT), m(M_DEFAULT){
+LehmerSet::LehmerSet(long seed, int streamCount, long jumpMult) : a(A_DEFAULT), m(M_DEFAULT){
 	long q = m / a;
 	long r = m % a;
-	for(int i = 0; i < COUNT_DEFAULT; i++){
+	// Select the jumpMultiplier
+	switch(streamCount){
+	case 128:
+		jumpMult = jumpMult128;
+		break;
+	case 256:
+		jumpMult = jumpMult256;
+		break;
+	case 512:
+		jumpMult = jumpMult512;
+		break;
+	case 1024:
+		jumpMult = jumpMult1024;
+		break;
+	default:
+		jumpMult = (jumpMult == jumpMult256 ? calcJumpMult(0, 0, 0) : jumpMult);
+		break;
+	}
+	// Initialize the streamss
+	for(int i = 0; i < streamCount; i++){
 		streams.push_back(LehmerStream(a, m, seed));
 		draws.push_back(0);
-		seed = jumpMult256 * (seed % q) - r * (seed / q);
-		seed += (seed > 0 ? 0 : m);
+		seed = jumpMult * (seed % q) - r * (seed / q);
+		seed += ((seed > 0) ? 0 : m);
 	}
 }
 
@@ -53,17 +74,44 @@ double LehmerSet::random(int streamIndex){
 	return streams[streamIndex].random();
 }
 
-bool LehmerSet::validate(int streamIndex){
+bool LehmerSet::validate(int streamIndex) const{
 	return draws[streamIndex] < m / streams.size();
 }
 
-long LehmerSet::getSeed(int streamIndex){
+long LehmerSet::getSeed(int streamIndex) const{
 	return streams[streamIndex].getSeed();
 }
 
 void LehmerSet::putSeed(int streamIndex, long seed){
 	streams[streamIndex].putSeed(seed);
 }
+
+long LehmerSet::calcJumpMult(long a, int streamCount, long m){
+	long currentJ = m / streamCount;
+	long jumpMult = modular_pow(a, currentJ, m);
+	while(!isModulusCompatible(jumpMult, m)){
+		jumpMult = modular_pow(a, --currentJ, m);
+	}
+	return jumpMult;
+}
+
+// Binary modular exponentiation. Pseudo code taken from
+// http://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
+long LehmerSet::modular_pow(long base, long exponent, long modulus) {
+	int_least64_t result = 1;
+	int_least64_t hiBase = base;
+	int_least64_t hiExponent = exponent;
+	int_least64_t hiModulus = modulus;
+	while(hiExponent > 0){
+		if(hiExponent % 2 == 1){
+			result = (result * hiBase) % hiModulus;
+		}
+		hiExponent >>= 1;
+		hiBase = (hiBase * hiBase) % hiModulus;
+	}
+	return result;
+}
+
 /* - LehmerSet */
 
 

@@ -34,7 +34,7 @@ int main(int argc, char** argv){
 	cout << "Testing LehmerSet Behavior" << endl;
 	// Seed with 1
 	LehmerSet set(1);
-	cout << "LehmerSet initialized with seed 1" << endl;
+	cout << "LehmerSet initialized with seed 1 over 256 streams" << endl;
 	// Test state of stream 1
 	if(set.getSeed(1) != AJ256){
 		cout << "Stream 1 of set not on the proper state; expected " << AJ256 << " found " << set.getSeed(1) << endl;
@@ -46,7 +46,38 @@ int main(int argc, char** argv){
 
 	cout << endl;
 
+	// Testing Jump Multiplier calculation
+	cout << "Testing Jump Multiplier calculation:" << endl;
+	cout << "For a=48271, m=2147483647:" << endl;
+
+	long jumpMult;
+	int s = 128;
+
+	cout << s << " streams: ";
+	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
+	cout << jumpMult << " expected " << 40509 << endl;
+	s *= 2;
+
+	cout << s << " streams: ";
+	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
+	cout << jumpMult << " expected " << 22925 << endl;
+	s *= 2;
+
+	cout << s << " streams: ";
+	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
+	cout << jumpMult << " expected " << 44857 << endl;
+	s *= 2;
+
+	cout << s << " streams: ";
+	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
+	cout << jumpMult << " expected " << 97070 << endl;
+	s *= 2;
+
 	cout << "LehmerPRNG library functioning as expected." << endl;
+	cout << endl;
+	cout << "If the jump multipliers do not match, your compiler is not implementing " << endl
+			<< "int_least64_t correctly. You should avoid generating LehmerSet objects " << endl
+			<< "with with stream counts other than 128, 256, 512, or 1024."<< endl;
 
 	return 0;
 }
