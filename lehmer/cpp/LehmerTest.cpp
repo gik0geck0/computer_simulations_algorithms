@@ -55,26 +55,28 @@ int main(int argc, char** argv){
 
 	cout << s << " streams: ";
 	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
-	cout << jumpMult << " expected " << 40509 << endl;
+	cout << " got " << jumpMult << " expected " << 40509 << endl;
 	s *= 2;
 
 	cout << s << " streams: ";
 	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
-	cout << jumpMult << " expected " << 22925 << endl;
+	cout << " got " << jumpMult << " expected " << 22925 << endl;
 	s *= 2;
 
 	cout << s << " streams: ";
 	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
-	cout << jumpMult << " expected " << 44857 << endl;
+	cout << " got " << jumpMult << " expected " << 44857 << endl;
 	s *= 2;
 
 	cout << s << " streams: ";
 	jumpMult = LehmerSet::calcJumpMult(48271L, s, 2147483647L);
-	cout << jumpMult << " expected " << 97070 << endl;
+	cout << " got " << jumpMult << " expected " << 97070 << endl;
 	s *= 2;
 
+	cout << endl;
 	cout << "LehmerPRNG library functioning as expected." << endl;
 	cout << endl;
+	
 	cout << "If the jump multipliers do not match, your compiler is not implementing " << endl
 			<< "int_least64_t correctly. You should avoid generating LehmerSet objects " << endl
 			<< "with with stream counts other than 128, 256, 512, or 1024."<< endl;
