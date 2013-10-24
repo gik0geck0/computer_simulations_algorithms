@@ -15,6 +15,7 @@ To use an existing PMMLCG to generate pseudo-random values:
 
     // Stream state advanced by one a * x % m calculation
     long randVal = stream.random;
+    
 
 To create an object with 256 disjoint PMMLCGs ("Lehmer Set"):
 
@@ -23,9 +24,69 @@ To create an object with 256 disjoint PMMLCGs ("Lehmer Set"):
     long seed = /* Some 32bit value */
     LehmerSet set(seed);
     
+    
 To draw from stream N in a LehmerSet:
 
     // Stream N advanced by one call to random, others unchanged
     long randVal = set.random(N);
+     
+     
+     
+=== DEPENDENCIES ===
 
-=== 
+The provided Makefile assumes g++. Any standards-compliant c++
+compiler should work, and can be substituted into the makefile
+on systems that support make. This Makefile includes targets for
+a compilation unit .o file (obj) and test executable (test).
+
+On systems which rely on automated build managers rather than
+make, putting LehmerPRNG.h and LehmerPRNG.cpp in the project
+header and source files, respectively, should work.
+
+LehmerTest.cpp should be compiled only for testing the
+functionality of the library on a given system. It should
+otherwise be excluded from any builds to avoid definition
+conflicts on main(int, char**).
+
+No external libraries or source code are required.
+
+STL libraries <vector> and <stdint> required for LehmerPRNG
+STL library <iostream> additionally required for LehmerTest
+
+
+
+=== ADVANCED FEATURES ===
+
+
+The user can specify their own a- and m-values for a PMMLCG.
+It is the user's responsibility to verify that the supplied
+values produce a valuable pRNG.
+
+    LehmerStream(long seed, long a, long m);
+    LehmerSet(long seed, int streamCount, long a, long m);
+
+Note that the LehmerSet requires specifying the number of streams
+to be used before the stream parameters.
+
+
+Jump multipliers can be calculated offline with the calcJumpMod
+function of LehmerSet.
+
+    LehmerSet::calcJumpMod(long a, int streamCount, long m);
+
+Calculating jump modifiers offline is recommended to protect
+against combinations of a, streamCount, and m which might take
+a long time to compute. The binary exponentiation implementation
+included has shown to be exceedingly fast for the default a and
+m values, but testing was very much non-rigorous in this regard.
+
+
+A stream can be tested for valid disjointedness during runtime.
+A stream will be marked as invalid if it has consumed more than
+the minimum guaranteed size of any given stream. It may not have
+overlapped into the next stream. An invalid stream can continue to
+be used for supplying pRNG values, but this may result in phasing
+of unrelated portions of the simulation. Switching streams, or
+constructing a set with fewer streams, is recommended.
+
+    set.validate(127); // validate the 128th stream, at index 127

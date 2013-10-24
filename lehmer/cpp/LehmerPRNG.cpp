@@ -12,13 +12,16 @@
 /* + LehmerStream */
 
 LehmerStream::LehmerStream(long seed, long a, long m)
-	: a(a), m(m), x(seed), q(m/a), r(m%a){
+: a(a), m(m), x(seed), q(m/a), r(m%a){
 	// TODO: If r > q, signal a problem
 }
 
 double LehmerStream::random(){
+	// See Lehmer pRNG algorithm for calculating values without overflow
 	long t = a * (x % q) - r * (x / q);
+	// Adjust x to be within valid bounds
 	x = t > 0 ? t : t + m;
+	// Cast x and map to [0, 1]
 	return ((double)x / m);
 }
 
@@ -38,23 +41,29 @@ LehmerSet::LehmerSet(long seed, int streamCount, long a, long m) : a(A_DEFAULT),
 	long q = m / a;
 	long r = m % a;
 	long jumpMult;
-	// Select the jumpMultiplier
-	switch(streamCount){
-	case 128:
-		jumpMult = jumpMult128;
-		break;
-	case 256:
-		jumpMult = jumpMult256;
-		break;
-	case 512:
-		jumpMult = jumpMult512;
-		break;
-	case 1024:
-		jumpMult = jumpMult1024;
-		break;
-	default:
+	// Select the jumpMultiplier for devault a, m values
+	if(a == A_DEFAULT && m == M_DEFAULT){
+		switch(streamCount){
+		case 128:
+			jumpMult = jumpMult128;
+			break;
+		case 256:
+			jumpMult = jumpMult256;
+			break;
+		case 512:
+			jumpMult = jumpMult512;
+			break;
+		case 1024:
+			jumpMult = jumpMult1024;
+			break;
+		default:
+			jumpMult = calcJumpMult(a, streamCount, m);
+			break;
+		}
+	}
+	// Calculate the jump multiplier for given a, m values
+	else {
 		jumpMult = calcJumpMult(a, streamCount, m);
-		break;
 	}
 	// Initialize the streamss
 	for(int i = 0; i < streamCount; i++){

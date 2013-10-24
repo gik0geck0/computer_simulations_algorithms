@@ -8,7 +8,7 @@ EXEFLAGS=-g
 all: lehmer.o LehmerTest.cpp
 	${CC} ${EXEFLAGS} LehmerTest.cpp lehmer.o -o lehmerTest
 
-lib: lehmer.o
+obj: lehmer.o
 
 lehmer.o: LehmerPRNG.h LehmerPRNG.cpp
 	${CC} ${LIBFLAGS} LehmerPRNG.cpp -o lehmer.o

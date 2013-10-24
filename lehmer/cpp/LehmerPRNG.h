@@ -22,6 +22,7 @@ public:
 	long getSeed() const;
 	// Set the current state of the stream to seed
 	// The caller is responsible for verifying the validity of the seed
+	// Precondition: seed >= 0
 	void putSeed(long seed);
 private:
 	long a;
@@ -50,6 +51,7 @@ public:
 	// Current state of the stream at an index
 	long getSeed(int streamIndex) const;
 	// Set the state of the stream at an index.
+	// Precondition: there are at least streamIndex+1 streams, seed >= 0
 	// Postcondition: Validity of streams is no longer known
 	void putSeed(int streamIndex, long seed);
 	// Calculate jump multiplier for the given parameters. On a 32 bit machine,
@@ -57,12 +59,11 @@ public:
 	// very slow. If possible, calculate the jump multiplier once offline and then use
 	// a parameterized ctor for LehmerSet.
 	static long calcJumpMult(long a, int streamCount, long m);
-	// Precalculated jump modifiers
+private:
 	const static long jumpMult128 = 40509L;
 	const static long jumpMult256 = 22925L;
 	const static long jumpMult512 = 44857L;
 	const static long jumpMult1024 = 97070L;
-private:
 	const static long A_DEFAULT = 48271;
 	const static long M_DEFAULT = 2147483647L;
 	const static long COUNT_DEFAULT = 256;
