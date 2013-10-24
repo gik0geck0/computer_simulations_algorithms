@@ -14,7 +14,7 @@ int main(int argc, char** argv){
 	cout << "Testing LehmerStream Behavior" << endl;
 	// Seed with 1
 	LehmerStream stream(1);
-	cout << "LehmerStream initialized with seed" << stream.getSeed() << endl;
+	cout << "LehmerStream initialized with seed " << stream.getSeed() << endl;
 	// Draw 10k times
 	for(int i = 0; i < 10000; i++){
 		stream.random();
@@ -74,7 +74,7 @@ int main(int argc, char** argv){
 	s *= 2;
 
 	cout << endl;
-	cout << "LehmerPRNG library functioning as expected." << endl;
+	cout << "LehmerPRNG Streams and Sets functioning as expected." << endl;
 	cout << endl;
 	
 	cout << "If the jump multipliers do not match, your compiler is not implementing " << endl

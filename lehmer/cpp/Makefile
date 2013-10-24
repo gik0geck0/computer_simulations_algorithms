@@ -1,9 +1,12 @@
 # Default to g++
 CC=g++
 # Generate compilation unite
-LIBFLAGS="-c"
-# No optimization, include debugging information
-EXEFLAGS="-g"
+LIBFLAGS=-c
+# Default optimization, include debugging information
+EXEFLAGS=-g
+
+all: lehmer.o LehmerTest.cpp
+	${CC} ${EXEFLAGS} LehmerTest.cpp lehmer.o -o lehmerTest
 
 lib: lehmer.o
 

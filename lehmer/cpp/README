@@ -1,0 +1,31 @@
+Library: LehmerPRNG
+Authors: Matthew Buland, John Kelly
+
+=== QUICKSTART ===
+
+To create a new PMMLCG ("Lehmer Stream") on the stack:
+
+    #include "LehmerPRNG.h"
+    
+    long seed = /* Some 32bit value */
+    LehmerStream stream(seed);
+
+
+To use an existing PMMLCG to generate pseudo-random values:
+
+    // Stream state advanced by one a * x % m calculation
+    long randVal = stream.random;
+
+To create an object with 256 disjoint PMMLCGs ("Lehmer Set"):
+
+    #include "LehmerPRNG.h"
+    
+    long seed = /* Some 32bit value */
+    LehmerSet set(seed);
+    
+To draw from stream N in a LehmerSet:
+
+    // Stream N advanced by one call to random, others unchanged
+    long randVal = set.random(N);
+
+=== 

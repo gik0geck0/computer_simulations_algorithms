@@ -12,12 +12,10 @@
 
 class LehmerStream{
 public:
-	// Construct a LehmerStream with a = 48271, m = 2147483647, seeded to seed
-	LehmerStream(long seed);
-	// Construct a LehmerStream with custom a and m values
+	// Construct a LehmerStream with custom a and m values, or defaults
 	// The caller is responsible for verifying the modulus compatibility,
 	// etc., of the passed values
-	LehmerStream(long a, long m, long seed);
+	LehmerStream(long seed, long a = A_DEFAULT, long m = M_DEFAULT);
 	// Return a random value uniformly distributed on the interval (0.0, 1.0)
 	double random();
 	// Get the current state of the stream, without advancing it
@@ -40,9 +38,9 @@ public:
 	// Generate a stream set with streamCount streams using specified jumpMult.
 	// If streamCount is one of {128, 256, 512, 1024}, a precalculated jump
 	// multiplier is used. Otherwise, the jump multiplier must be calculated
-	// at runtime; this is very slow and not recommended.
+	// at runtime; this is can be slow and is not recommended.
 	// See calcJumpMult for offline calculation of jump multipliers.
-	LehmerSet(long seed, int streamCount = 256, long jumpMult = jumpMult256);
+	LehmerSet(long seed, int streamCount = 256, long a = A_DEFAULT, long m = M_DEFAULT);
 	// Return a value from Uniform(0.0, 1.0)
 	double random(int streamIndex);
 	// True if the stream has not overrun into another stream or wrapped around into itself
@@ -59,11 +57,12 @@ public:
 	// very slow. If possible, calculate the jump multiplier once offline and then use
 	// a parameterized ctor for LehmerSet.
 	static long calcJumpMult(long a, int streamCount, long m);
-private:
+	// Precalculated jump modifiers
 	const static long jumpMult128 = 40509L;
 	const static long jumpMult256 = 22925L;
 	const static long jumpMult512 = 44857L;
 	const static long jumpMult1024 = 97070L;
+private:
 	const static long A_DEFAULT = 48271;
 	const static long M_DEFAULT = 2147483647L;
 	const static long COUNT_DEFAULT = 256;

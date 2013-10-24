@@ -11,13 +11,8 @@
 
 /* + LehmerStream */
 
-LehmerStream::LehmerStream(long a, long m, long seed)
+LehmerStream::LehmerStream(long seed, long a, long m)
 	: a(a), m(m), x(seed), q(m/a), r(m%a){
-	// TODO: If r > q, signal a problem
-}
-
-LehmerStream::LehmerStream(long seed)
-	: a(A_DEFAULT), m(M_DEFAULT), x(seed), q(m/a), r(m%a){
 	// TODO: If r > q, signal a problem
 }
 
@@ -39,9 +34,10 @@ long LehmerStream::getSeed() const{
 
 /* + LehmerSet */
 
-LehmerSet::LehmerSet(long seed, int streamCount, long jumpMult) : a(A_DEFAULT), m(M_DEFAULT){
+LehmerSet::LehmerSet(long seed, int streamCount, long a, long m) : a(A_DEFAULT), m(M_DEFAULT){
 	long q = m / a;
 	long r = m % a;
+	long jumpMult;
 	// Select the jumpMultiplier
 	switch(streamCount){
 	case 128:
@@ -57,12 +53,12 @@ LehmerSet::LehmerSet(long seed, int streamCount, long jumpMult) : a(A_DEFAULT), 
 		jumpMult = jumpMult1024;
 		break;
 	default:
-		jumpMult = (jumpMult == jumpMult256 ? calcJumpMult(0, 0, 0) : jumpMult);
+		jumpMult = calcJumpMult(a, streamCount, m);
 		break;
 	}
 	// Initialize the streamss
 	for(int i = 0; i < streamCount; i++){
-		streams.push_back(LehmerStream(a, m, seed));
+		streams.push_back(LehmerStream(seed, a, m));
 		draws.push_back(0);
 		seed = jumpMult * (seed % q) - r * (seed / q);
 		seed += ((seed > 0) ? 0 : m);
