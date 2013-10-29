@@ -87,6 +87,8 @@ the minimum guaranteed size of any given stream. It may not have
 overlapped into the next stream. An invalid stream can continue to
 be used for supplying pRNG values, but this may result in phasing
 of unrelated portions of the simulation. Switching streams, or
-constructing a set with fewer streams, is recommended.
+constructing a set with fewer streams, is recommended. If a stream
+fails to validate, an error message is logged to lehmerprng.error
+in the working directory.
 
     set.validate(127); // validate the 128th stream, at index 127
