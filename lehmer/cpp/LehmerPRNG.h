@@ -59,6 +59,13 @@ public:
 	// very slow. If possible, calculate the jump multiplier once offline and then use
 	// a parameterized ctor for LehmerSet.
 	static long calcJumpMult(long a, int streamCount, long m);
+
+    // Get the number of streams
+    long getSize() const;
+
+    // Get the number of values per stream
+    long getStreamSize() const;
+
 private:
 	const static long jumpMult128 = 40509L;
 	const static long jumpMult256 = 22925L;

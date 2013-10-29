@@ -7,6 +7,8 @@
 
 #include "LehmerPRNG.h"
 
+#include <iostream>
+#include <fstream>
 #include <stdint.h>
 
 /* + LehmerStream */
@@ -80,7 +82,31 @@ double LehmerSet::random(int streamIndex){
 }
 
 bool LehmerSet::validate(int streamIndex) const{
-	return draws[streamIndex] < m / streams.size();
+	bool overdrawn = draws[streamIndex] < m / streams.size();
+
+    if (overdrawn) {
+        std::ofstream errfile;
+
+        errfile.open("lehmerprng.error", std::ios::out | std::ios::app);
+        errfile << "Stream number " << streamIndex << " has been overdrawn." << std::endl;
+        errfile.close();
+
+        /*
+         * Commented out for being invasive. Not sure I'm a huge fan of it.
+        errfile.open("~/lehmerprng.error", std::ios::out | std::ios::app);
+        errfile << "Stream number " << streamIndex << " has been overdrawn by " << (draws[streamIndex] - (int) (m / streams.size())) << std::endl;
+        errfile.close();
+        */
+    }
+    return overdrawn;
+}
+
+long LehmerSet::getSize() const {
+    return streams.size();
+}
+
+long LehmerSet::getStreamSize() const {
+    return m / streams.size();
 }
 
 long LehmerSet::getSeed(int streamIndex) const{
@@ -118,5 +144,3 @@ long LehmerSet::modular_pow(long base, long exponent, long modulus) {
 }
 
 /* - LehmerSet */
-
-

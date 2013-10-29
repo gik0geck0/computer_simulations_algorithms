@@ -81,5 +81,31 @@ int main(int argc, char** argv){
 			<< "int_least64_t correctly. You should avoid generating LehmerSet objects " << endl
 			<< "with with stream counts other than 128, 256, 512, or 1024."<< endl;
 
+    // Testing Validate
+    cout << endl;
+    set.putSeed(1, 1L);
+    cout << "Testing notification that a lehmer stream has been overflown:" << endl;
+	// Draw 100k times
+	for(int i = 0; i < 8388606; i++){
+		set.random(1);
+	}
+    cout << "Drew some from the stream. Expecting the stream to be valid. Got ";
+    if (set.validate(1))
+        cout << "true";
+    else
+        cout << "false";
+    cout << " expected true." << endl;
+
+    // Now, run it over
+    for (int i=0; i < 10; i++)
+        set.random(1);
+
+    cout << "Overdrew the stream. Expected to be invalid. Got ";
+    if (set.validate(1))
+        cout << "true";
+    else
+        cout << "false";
+    cout << " expected false." << endl;
+
 	return 0;
 }
