@@ -67,7 +67,7 @@ LehmerSet::LehmerSet(long seed, int streamCount, long a, long m) : a(A_DEFAULT),
 	else {
 		jumpMult = calcJumpMult(a, streamCount, m);
 	}
-	// Initialize the streamss
+	// Initialize the streams
 	for(int i = 0; i < streamCount; i++){
 		streams.push_back(LehmerStream(seed, a, m));
 		draws.push_back(0);
@@ -76,29 +76,40 @@ LehmerSet::LehmerSet(long seed, int streamCount, long a, long m) : a(A_DEFAULT),
 	}
 }
 
+LehmerSet::~LehmerSet(){
+    for(int i = 0; i < streams.size(); i++){
+        validate(i);
+    }
+}
+
 double LehmerSet::random(int streamIndex){
 	draws[streamIndex]++;
 	return streams[streamIndex].random();
 }
 
 bool LehmerSet::validate(int streamIndex) const{
-	bool overdrawn = draws[streamIndex] < m / streams.size();
+    long maxDraws = m / streams.size();
+    bool overdrawn = draws[streamIndex] > maxDraws;
 
     if (overdrawn) {
         std::ofstream errfile;
-
         errfile.open("lehmerprng.error", std::ios::out | std::ios::app);
-        errfile << "Stream number " << streamIndex << " has been overdrawn." << std::endl;
+        // Timestamp
+        char tstamp[10];
+        time_t t = time(0);
+        strftime(tstamp, sizeof(tstamp), "%T", gmtime(&t));
+        // Stamp and log
+        errfile << tstamp << " Stream number " << streamIndex << " has been overdrawn with " << draws[streamIndex] << " of " << maxDraws << " draws." << std::endl;
         errfile.close();
 
         /*
-         * Commented out for being invasive. Not sure I'm a huge fan of it.
+         * Commented out for being invasive.
         errfile.open("~/lehmerprng.error", std::ios::out | std::ios::app);
-        errfile << "Stream number " << streamIndex << " has been overdrawn by " << (draws[streamIndex] - (int) (m / streams.size())) << std::endl;
+        errfile << tstamp << " Stream number " << streamIndex << " has been overdrawn with " << draws[streamIndex] << " of " << maxDraws << " draws." << std::endl;
         errfile.close();
         */
     }
-    return overdrawn;
+    return !overdrawn;
 }
 
 long LehmerSet::getSize() const {
