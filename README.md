@@ -14,6 +14,7 @@ Number Generators.
 ### Stable. In order of stability and work put in
 * C++
 * C
+
 ### Unstable/In Progress/Experimental
 * Python
 * Ruby
@@ -22,10 +23,12 @@ Number Generators.
 ## Installation and Use
 
 #### C/C++
-* cd lehmer/cpp
-* make
-There's currently no shared object file for the library, so direct-copy/linking
-is required
+```
+cd lehmer/cpp
+make
+```
+There is currently no shared object file for the library, so directly copying/linking
+is required.
 
 #### Ruby/Python/Haskell
 Directly require_relative or import the file
