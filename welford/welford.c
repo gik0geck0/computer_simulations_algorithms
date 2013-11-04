@@ -1,32 +1,42 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define VERBOSE 0
+
 struct welford_store {
-    int mean;
-    int stdev;
+    double mean;
+    double stdev;
     int n;
 };
 
-void addpoint(struct welford_store* wdata, int xi);
-int addmean(struct welford_store* wdata, int xi);
-int addstdev(struct welford_store* wdata, int xi);
+void addpoint(struct welford_store* wdata, double xi);
+double addmean(struct welford_store* wdata, double xi);
+double addstdev(struct welford_store* wdata, double xi);
 
-void addpoint(struct welford_store* wdata, int xi) {
-    printf("Adding point %i\n", xi);
+void addpoint(struct welford_store* wdata, double xi) {
     wdata->n++;
-    addmean(wdata, xi);
-    addstdev(wdata, xi);
-    return;
+    double newmean = addmean(wdata, xi);
+    double newstdev = addstdev(wdata, xi);
+
+    if (VERBOSE) {
+        printf("Adding podouble %f\n", xi);
+        printf("New mean=%f\n", newmean);
+        printf("New stdev=%f\n", newstdev);
+    }
 }
 
-int addmean(struct welford_store* wdata, int xi) {
-    wdata->mean = wdata->mean + (xi - wdata->mean) / wdata->n;
+double addmean(struct welford_store* wdata, double xi) {
+    if (wdata->n <= 0) {
+        wdata->mean = xi;
+    } else {
+        wdata->mean = wdata->mean + (xi - wdata->mean) / wdata->n;
+    }
     return wdata->mean;
 }
 
-int addstdev(struct welford_store* wdata, int xi) {
+double addstdev(struct welford_store* wdata, double xi) {
     if (wdata->n <= 1) {
-        return wdata->stdev;
+        wdata->stdev = 0;
     } else {
         wdata->stdev = wdata->stdev + ((wdata->n-1)/wdata->n) * ((xi - wdata->stdev)*(xi - wdata->stdev));
     }
@@ -37,8 +47,10 @@ int main() {
     // Testing welford usage
 
     int points = 256;
+    // Inclusive range
     int min = 0;
-    int max = 1;
+    int max = 10;
+
     int seed = 1;
     srand(seed);
 
@@ -47,12 +59,12 @@ int main() {
     wfrdata->stdev = 0;
 
     for (int i=0; i < points; i++) {
-        //int nextpoint = rand() % (max - min) + min;
-        int nextpoint = i;
+        double nextpoint = rand() % (max - min+1) + min;
+        //double nextpoint = i;
+        printf("Next point is %f\n", nextpoint);
         addpoint(wfrdata, nextpoint);
     }
-
-    printf("For %i points, Calculated mean=%i and stdev=%i\n", wfrdata->n, wfrdata->mean, wfrdata->stdev);
+    printf("For %i points, Calculated mean=%f and stdev=%f\n", wfrdata->n, wfrdata->mean, wfrdata->stdev);
 
     free(wfrdata);
 }
