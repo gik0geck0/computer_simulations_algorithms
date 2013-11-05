@@ -8,7 +8,7 @@ makeInfLehmerGen :: Int -> Int -> Int -> [Int]
 makeInfLehmerGen a m seed = iterate (lehmerRNG a m) seed
 
 getJumpSeeds :: Int -> Int -> Int -> Int -> Int -> [Int]
-getJumpSeeds a j streams m x = makeInfLehmerGen (calcAj a j m) m x
+getJumpSeeds a j streams m x = take streams $ makeInfLehmerGen (calcAj a j m) m x
 
 -- Calculates the jump multiplier that should be used: a^j % m
 calcAj :: Int -> Int -> Int -> Int
@@ -29,6 +29,7 @@ main = do
         s = 256
         j = 16775552
         -- infGen = makeInfLehmerGen 
-        -- jSeeds = getJumpSeeds 3 2 2 31 2
+        jSeeds = getJumpSeeds 3 2 2 31 2
         in print $ calcAj a j m
+            putStrLn $ show $ take s jSeeds
         --print $ take 10 jSeeds
