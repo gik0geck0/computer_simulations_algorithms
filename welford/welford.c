@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 struct welford_store {
     double mean;
@@ -13,15 +13,17 @@ void addpoint(struct welford_store* wdata, double xi);
 double addmean(struct welford_store* wdata, double xi);
 double addstdev(struct welford_store* wdata, double xi);
 
+// Note: This order is a requirement. n++ first, then stdev, then mean
+// NOTE!!!! Always calculate the standard deviation FIRST
 void addpoint(struct welford_store* wdata, double xi) {
     wdata->n++;
-    double newmean = addmean(wdata, xi);
     double newstdev = addstdev(wdata, xi);
+    double newmean = addmean(wdata, xi);
 
     if (VERBOSE) {
-        printf("Adding podouble %f\n", xi);
-        printf("New mean=%f\n", newmean);
+        printf("Adding point %f\n", xi);
         printf("New stdev=%f\n", newstdev);
+        printf("New mean=%f\n", newmean);
     }
 }
 
@@ -38,15 +40,19 @@ double addstdev(struct welford_store* wdata, double xi) {
     if (wdata->n <= 1) {
         wdata->stdev = 0;
     } else {
-        wdata->stdev = wdata->stdev + ((wdata->n-1)/wdata->n) * ((xi - wdata->stdev)*(xi - wdata->stdev));
+        wdata->stdev = wdata->stdev + (((double) (wdata->n -1))/(double) wdata->n) * ((xi - wdata->mean)*(xi - wdata->mean));
     }
     return wdata->stdev;
+}
+
+double getstdev(struct welford_store* wdata) {
+    return wdata->stdev / wdata->n;
 }
 
 int main() {
     // Testing welford usage
 
-    int points = 256;
+    int points = 20;
     // Inclusive range
     int min = 0;
     int max = 10;
