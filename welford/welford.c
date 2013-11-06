@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -5,24 +6,24 @@
 
 struct welford_store {
     double mean;
-    double stdev;
+    double variance;
     int n;
 };
 
 void addpoint(struct welford_store* wdata, double xi);
 double addmean(struct welford_store* wdata, double xi);
-double addstdev(struct welford_store* wdata, double xi);
+double addvariance(struct welford_store* wdata, double xi);
 
-// Note: This order is a requirement. n++ first, then stdev, then mean
+// Note: This order is a requirement. n++ first, then variance, then mean
 // NOTE!!!! Always calculate the standard deviation FIRST
 void addpoint(struct welford_store* wdata, double xi) {
     wdata->n++;
-    double newstdev = addstdev(wdata, xi);
+    double newvariance = addvariance(wdata, xi);
     double newmean = addmean(wdata, xi);
 
     if (VERBOSE) {
         printf("Adding point %f\n", xi);
-        printf("New stdev=%f\n", newstdev);
+        printf("New variance=%f\n", newvariance);
         printf("New mean=%f\n", newmean);
     }
 }
@@ -36,17 +37,21 @@ double addmean(struct welford_store* wdata, double xi) {
     return wdata->mean;
 }
 
-double addstdev(struct welford_store* wdata, double xi) {
+double addvariance(struct welford_store* wdata, double xi) {
     if (wdata->n <= 1) {
-        wdata->stdev = 0;
+        wdata->variance = 0;
     } else {
-        wdata->stdev = wdata->stdev + (((double) (wdata->n -1))/(double) wdata->n) * ((xi - wdata->mean)*(xi - wdata->mean));
+        wdata->variance = wdata->variance + (((double) (wdata->n -1))/(double) wdata->n) * ((xi - wdata->mean)*(xi - wdata->mean));
     }
-    return wdata->stdev;
+    return wdata->variance;
+}
+
+double getvariance(struct welford_store* wdata) {
+    return wdata->variance / wdata->n;
 }
 
 double getstdev(struct welford_store* wdata) {
-    return wdata->stdev / wdata->n;
+    return sqrt(getvariance(wdata));
 }
 
 int main() {
@@ -62,7 +67,7 @@ int main() {
 
     struct welford_store* wfrdata = malloc(sizeof(struct welford_store));
     wfrdata->mean = 0;
-    wfrdata->stdev = 0;
+    wfrdata->variance = 0;
 
     for (int i=0; i < points; i++) {
         double nextpoint = rand() % (max - min+1) + min;
@@ -70,7 +75,7 @@ int main() {
         printf("Next point is %f\n", nextpoint);
         addpoint(wfrdata, nextpoint);
     }
-    printf("For %i points, Calculated mean=%f and stdev=%f\n", wfrdata->n, wfrdata->mean, wfrdata->stdev);
+    printf("For %i points, Calculated mean=%f, variance=%f, stdev=%f\n", wfrdata->n, wfrdata->mean, wfrdata->variance, getstdev(wfrdata));
 
     free(wfrdata);
 }
