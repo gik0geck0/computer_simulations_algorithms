@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define VERBOSE 1
+#define VERBOSE 0
 
 struct welford_store {
     double mean;
@@ -75,7 +75,7 @@ int main() {
         printf("Next point is %f\n", nextpoint);
         addpoint(wfrdata, nextpoint);
     }
-    printf("For %i points, Calculated mean=%f, variance=%f, stdev=%f\n", wfrdata->n, wfrdata->mean, wfrdata->variance, getstdev(wfrdata));
+    printf("For %i points, Calculated mean=%f, variance=%f, stdev=%f\n", wfrdata->n, wfrdata->mean, getvariance(wfrdata), getstdev(wfrdata));
 
     free(wfrdata);
 }
