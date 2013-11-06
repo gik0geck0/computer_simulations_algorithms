@@ -1,3 +1,3 @@
 
-c: welford.c
-	gcc --std=c99 -lm -g -Wall -pedantic welford.c -o welfordtest
+c: welford.cpp
+	g++ -lm -g -Wall -pedantic welford.cpp -o welfordtest
