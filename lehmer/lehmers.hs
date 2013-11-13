@@ -26,10 +26,12 @@ main = do
     -- a=48271, m=2147483647, streams=256, AJ should be 22925 and x0=123456789
     let a = 48271
         m = 2^31-1
-        s = 256
+        s = 2
         j = 16775552
-        -- infGen = makeInfLehmerGen 
-        jSeeds = getJumpSeeds 3 2 2 31 2
-        in print $ calcAj a j m
-            putStrLn $ show $ take s jSeeds
+        seed = 2
+        -- infGen = makeInfLehmerGen
+        jSeeds = getJumpSeeds a j s m seed
+        in do
+            print $ calcAj a j m
+            mapM_ putStrLn $ map show $ take s jSeeds
         --print $ take 10 jSeeds
