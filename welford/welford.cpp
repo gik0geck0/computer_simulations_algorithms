@@ -116,7 +116,7 @@ double WelfordStore::getstdev() {
 }
 
 double WelfordStore::getstdev(int lag) {
-    return sqrt(variance[lag]);
+    return sqrt(getvariance(lag));
 }
 
 double WelfordStore::getmean() {
