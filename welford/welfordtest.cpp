@@ -9,38 +9,39 @@ using namespace std;
 int main(int argc, char** argv){
     // Testing welford usage
 
-    int points = 20;
-    // Inclusive range
-    int min = 0;
-    int max = 10;
+//    int points = 20;
+//    // Inclusive range
+//    int min = 0;
+//    int max = 10;
     int seed = 1;
     srand(seed);
 
-    Welford w1(5);
+    WelfordStore w1(5);
 
     cout << endl;
 
-    cout << "Inserting 20 points into Welford tracker. {";
-    w1.addData(6); cout << 6 << ", ";
-    w1.addData(10); cout << 10 << ", ";
-    w1.addData(6); cout << 6 << ", ";
-    w1.addData(2); cout << 2 << ", ";
-    w1.addData(1); cout << 1 << ", ";
-    w1.addData(4); cout << 4 << ", ";
-    w1.addData(0); cout << 0 << ", ";
-    w1.addData(6); cout << 6 << ", ";
-    w1.addData(3); cout << 3 << ", ";
-    w1.addData(1); cout << 1 << ", ";
-    w1.addData(8); cout << 8 << ", ";
-    w1.addData(7); cout << 7 << ", ";
-    w1.addData(5); cout << 5 << ", ";
-    w1.addData(3); cout << 3 << ", ";
-    w1.addData(7); cout << 7 << ", ";
-    w1.addData(4); cout << 4 << ", ";
-    w1.addData(9); cout << 9 << ", ";
-    w1.addData(10); cout << 10 << ", ";
-    w1.addData(2); cout << 2 << ", ";
-    w1.addData(0); cout << 0 << ", ";
+    cout << "Inserting 20 points into Welford tracker." << endl;
+    cout << "{";
+    w1.addPoint(6); cout << 6 << ", ";
+    w1.addPoint(10); cout << 10 << ", ";
+    w1.addPoint(6); cout << 6 << ", ";
+    w1.addPoint(2); cout << 2 << ", ";
+    w1.addPoint(1); cout << 1 << ", ";
+    w1.addPoint(4); cout << 4 << ", ";
+    w1.addPoint(0); cout << 0 << ", ";
+    w1.addPoint(6); cout << 6 << ", ";
+    w1.addPoint(3); cout << 3 << ", ";
+    w1.addPoint(1); cout << 1 << ", ";
+    w1.addPoint(8); cout << 8 << ", ";
+    w1.addPoint(7); cout << 7 << ", ";
+    w1.addPoint(5); cout << 5 << ", ";
+    w1.addPoint(3); cout << 3 << ", ";
+    w1.addPoint(7); cout << 7 << ", ";
+    w1.addPoint(4); cout << 4 << ", ";
+    w1.addPoint(9); cout << 9 << ", ";
+    w1.addPoint(10); cout << 10 << ", ";
+    w1.addPoint(2); cout << 2 << ", ";
+    w1.addPoint(0); cout << 0 << ", ";
     cout << "}" << endl;
 
     int singleC = w1.count();
@@ -83,8 +84,8 @@ int main(int argc, char** argv){
 
     cout << "Testing covariance" << endl;
 
-    Welford w2;
-    Welford w3;
+    WelfordStore w2;
+    WelfordStore w3;
     WelfordCoVar wc(&w3, &w2);
 
     return 0;
