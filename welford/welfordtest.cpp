@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <iostream>
-
+#include <fstream>
 
 #include "welford.h"
 
@@ -8,6 +8,27 @@ using namespace std;
 
 int main(int argc, char** argv){
     // Testing welford usage
+
+	// TODO: Argument specified input data
+	ifstream data("testdata-1000-10.dat");
+
+	WelfordStore w(10);
+	double d;
+	while(data >> d){
+		w.addPoint(d);
+	}
+
+	// TODO: Argument specified results data
+	ifstream results("results-1000-10.dat");
+	data.close();
+	results.close();
+
+	for(int l = 0; l <= 10; l++){
+		cout << l << "\t" << 1000-l << "\t" << w.mean() << "\t" << w.variance() << "\t" << w.laggedVariance(l) << "\t" << w.laggedAutoCorr(l) << endl;
+	}
+
+return 0;
+	cout << "*****" << endl;
 
 //    int points = 20;
 //    // Inclusive range
@@ -47,7 +68,7 @@ int main(int argc, char** argv){
     int singleC = w1.count();
     double singleM = w1.mean();
     double singleSD = w1.stdDev();
-    double singleV = w1.var();
+    double singleV = w1.variance();
 
     cout << "For " << singleC << " points, calculated:" << endl;
 
@@ -63,14 +84,14 @@ int main(int argc, char** argv){
 
     cout << "Std Dev: " << singleSD;
     if((singleSD - 3.116087) > eps){
-        cout << ", expected 3.116087, error of " << singleM - 3.116087 << endl;
+        cout << ", expected 3.116087, off by " << singleM - 3.116087 << endl;
         return 0;
     }
     cout << endl;
 
     cout << "Variance: " << singleV;
     if((singleV - 194.2) > eps){
-        cout << ", expected 194.2, error of" << singleV - 194.2 << endl;
+        cout << ", expected 194.2, off by " << singleV - 194.2 << endl;
         return 0;
     }
     cout << endl;
@@ -84,9 +105,10 @@ int main(int argc, char** argv){
 
     cout << "Testing covariance" << endl;
 
-    WelfordStore w2;
-    WelfordStore w3;
-    WelfordCoVar wc(&w3, &w2);
+    WelfordStore* w2 = new WelfordStore();
+    WelfordStore* w3 = new WelfordStore();
+    WelfordCoVar* wc = new WelfordCoVar(w3, w2);
+
 
     return 0;
 }

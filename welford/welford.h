@@ -19,7 +19,7 @@ class WelfordStore {
 
 public:
     // The constructed Welford object will track at most maxLag points for autocorrelation
-    WelfordStore(int maxLag = 0);
+    explicit WelfordStore(int maxLag = 0);
 
     // Adds a data point
     void addPoint(double p);
@@ -31,7 +31,7 @@ public:
     double mean();
 
     // Returns the variance of all data points so far
-    double var();
+    double variance();
     // Convenience function for sqrt(var() / count())
     double stdDev();
 
@@ -39,10 +39,9 @@ public:
     // After the call, @lag contains the lag interval returned
     // If lag was a valid interval for this object, it is unchanged
     // Otherwise, lag may be raised to 0 or lowered to the maximum lag being tracked, as appropriate
-    double laggedVar(int& lag);
-    // Convenience function for sqrt(varLag(lag) / count())
-    // @lag behaves similarly
-    double laggedStdDev(int& lag);
+    double laggedAutoCorr(int& lag);
+    // Direct access to the underlying lagged variance value
+    double laggedVariance(int& lag);
 
     // Add or remove a covariance listener object to notify when points are added
     void registerCoVarListener(WelfordCoVar* listener);

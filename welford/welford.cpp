@@ -6,6 +6,7 @@
  */
 
 #include <cmath>
+#include <algorithm>
 
 #include "welford.h"
 
@@ -14,7 +15,10 @@
 // Count of 0
 // Mean of 0
 // Each lag value on [0, maxLag] gets an entry in the vector, initialized to 0
-WelfordStore::WelfordStore(int maxLag) : valCount(0), runningMean(0), variances(maxLag+1,0){
+WelfordStore::WelfordStore(int maxLag) : valCount(0), runningMean(0){
+	for(int i = 0; i < maxLag+1; ++i){
+		variances.push_back(0);
+	}
 }
 
 
@@ -22,16 +26,16 @@ void WelfordStore::addPoint(double p){
     valCount++;
 
     // Update the running variance total
-    if (valCount <= 1) {
-        variances[0] = 0;
-    } else {
-        variances[0] = variances[0] + (((double) (valCount -1))/(double) valCount) * ((p - runningMean)*(p - runningMean));
-    }
+//    if (valCount <= 1) {
+//        variances[0] = 0;
+//    } else {
+        variances[0] += ((valCount - 1.0)/ valCount) * ((p - runningMean)*(p - runningMean));
+//    }
     // When valCount is 1 and lag is 0, the expression will 0 out and set the variance to 0, no need for an explicit logic branch
 
     // Update lagged variances
     for(std::vector<double>::size_type l = 0; l < lagWindow.size(); ++l){
-        variances[l+1] += (valCount / (valCount+1.0)) * (p - runningMean) * (lagWindow[l] - runningMean);
+        variances[l+1] += ((valCount-1.0) / valCount) * (p - runningMean) * (lagWindow[l] - runningMean);
     }
 
     lagWindow.push_front(p);
@@ -61,19 +65,23 @@ double WelfordStore::mean(){
     return runningMean;
 }
 
-double WelfordStore::var(){
-    return variances[0];
+double WelfordStore::variance(){
+    return variances[0] / valCount;
 }
-
 
 double WelfordStore::stdDev(){
     return std::sqrt(variances[0] / valCount);
 }
 
-double WelfordStore::laggedVar(int& lag){
-    return variances[lag-1];
+double WelfordStore::laggedAutoCorr(int& lag){
+	// TODO: Sanitize and set lag
+    return variances[lag]/variances[0];
 }
 
+double WelfordStore::laggedVariance(int& lag){
+	// TODO: Sanitize and set lag
+	return variances[lag] / (valCount - lag);
+}
 
 void WelfordStore::registerCoVarListener(WelfordCoVar* listener){
     listeners.insert(listener);
@@ -191,7 +199,7 @@ void WelfordStore::setup(std::vector<int> lagsin) {
         std::cout << lags.at(i) << ", ";
     }
     std::cout << std::endl;
-    mean.push_back(0);
+    mean.push_back(0);}
     variance.push_back(0);
 }
 
