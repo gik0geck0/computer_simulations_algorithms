@@ -10,4 +10,5 @@ welford.o: welford.cpp
 	g++ ${FLAGS} -Wall -pedantic -c welford.cpp
 
 clean:
-	rm welfordtest
+	rm -f welfordtest
+	rm -f welford.o

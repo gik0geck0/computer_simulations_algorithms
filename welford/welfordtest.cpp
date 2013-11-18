@@ -1,114 +1,118 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 #include "welford.h"
 
 using namespace std;
 
 int main(int argc, char** argv){
-    // Testing welford usage
-
-	// TODO: Argument specified input data
-	ifstream data("testdata-1000-10.dat");
-
-	WelfordStore w(10);
-	double d;
-	while(data >> d){
-		w.addPoint(d);
-	}
-
-	// TODO: Argument specified results data
-	ifstream results("results-1000-10.dat");
-	data.close();
-	results.close();
-
-	for(int l = 0; l <= 10; l++){
-		cout << l << "\t" << 1000-l << "\t" << w.mean() << "\t" << w.variance() << "\t" << w.laggedVariance(l) << "\t" << w.laggedAutoCorr(l) << endl;
-	}
-
-return 0;
-	cout << "*****" << endl;
-
-//    int points = 20;
-//    // Inclusive range
-//    int min = 0;
-//    int max = 10;
-    int seed = 1;
-    srand(seed);
-
-    WelfordStore w1(5);
-
-    cout << endl;
-
-    cout << "Inserting 20 points into Welford tracker." << endl;
-    cout << "{";
-    w1.addPoint(6); cout << 6 << ", ";
-    w1.addPoint(10); cout << 10 << ", ";
-    w1.addPoint(6); cout << 6 << ", ";
-    w1.addPoint(2); cout << 2 << ", ";
-    w1.addPoint(1); cout << 1 << ", ";
-    w1.addPoint(4); cout << 4 << ", ";
-    w1.addPoint(0); cout << 0 << ", ";
-    w1.addPoint(6); cout << 6 << ", ";
-    w1.addPoint(3); cout << 3 << ", ";
-    w1.addPoint(1); cout << 1 << ", ";
-    w1.addPoint(8); cout << 8 << ", ";
-    w1.addPoint(7); cout << 7 << ", ";
-    w1.addPoint(5); cout << 5 << ", ";
-    w1.addPoint(3); cout << 3 << ", ";
-    w1.addPoint(7); cout << 7 << ", ";
-    w1.addPoint(4); cout << 4 << ", ";
-    w1.addPoint(9); cout << 9 << ", ";
-    w1.addPoint(10); cout << 10 << ", ";
-    w1.addPoint(2); cout << 2 << ", ";
-    w1.addPoint(0); cout << 0 << ", ";
-    cout << "}" << endl;
-
-    int singleC = w1.count();
-    double singleM = w1.mean();
-    double singleSD = w1.stdDev();
-    double singleV = w1.variance();
-
-    cout << "For " << singleC << " points, calculated:" << endl;
-
-    cout << "Mean: " << singleM;
-    if(singleM != 4.7){
-        cout << ", expected 4.7" << endl;
-        return 0;
+    if(argc != 1 && argc != 3){
+        cout << "Usage: welfordtest /PATH/TO/testdata-N-L.dat /PATH/TO/results-N-L.dat" << endl;
+        cout << "Search for N=1000, L=10 in the working directory by default" << endl;
+        return 1;
     }
-    cout << endl;
 
-    // Arbitrary accuracy minimum of calculations
-    double eps = 0.000001;
-
-    cout << "Std Dev: " << singleSD;
-    if((singleSD - 3.116087) > eps){
-        cout << ", expected 3.116087, off by " << singleM - 3.116087 << endl;
-        return 0;
+    const char* inFName = "testdata-1000-10.dat";
+    const char* outFName = "results-1000-10.dat";
+    // Received explicit file locations
+    if(argc == 3){
+        inFName = argv[1];
+        outFName = argv[2];
     }
-    cout << endl;
 
-    cout << "Variance: " << singleV;
-    if((singleV - 194.2) > eps){
-        cout << ", expected 194.2, off by " << singleV - 194.2 << endl;
-        return 0;
+    ifstream data(inFName);
+    if(!data.is_open()){
+    	cerr << "Could not open input data file testdata-1000-10.dat" << endl;
+    	return 1;
     }
+
+    WelfordStore w(10);
+    double d;
+    while(data >> d){
+        w.addPoint(d);
+    }
+    data.close();
+
+    ifstream results(outFName);
+    if(!results.is_open()){
+    	cerr << "Could not open results data file results-1000-10.dat" << endl;
+    	return 1;
+    }
+
+    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    std::cout.precision(8);
+    int count;
+    double rMu, rSVar, rSCov, rj;
+    double wMu, wSVar, wSCov, wj;
+    double eMu, eSVar, eSCov, ej;
+
+    cout << "If a line appears such as " << endl;
+    cout << "  '- err: (...)" << endl;
+    cout << "The numbers on that line represent the error factor by which the value calculated by the library deviated from the expected value given by the input file." << endl;
+    cout << "These error lines are currently set to .1% tolerance on the sample mean and 5% tolerance on the sample variance, covariance, and auto-correlation coefficient." << endl;
+
     cout << endl;
 
-    // TODO: Covariance, lag 1
-    // TODO: Covariance, lag 5
-    cout << "Autovariance, lag 1: " << endl;
-    cout << "Autovariance, lag 5: " << endl;
+    // Table labels
+    cout << "Lag" << "\t" << "N" << "\t" << "Mu" << "\t\t" << "SVar" << "\t\t" << "SCovar" << "\t\t" << "r_j" << endl;
+
+    for(int l = 0; l <= 10; l++){
+        // Read expected values
+        results >> l >> count >> rMu >> rSVar >> rSCov >> rj;
+        // Collect calculated values
+        wMu = w.lagBackMean(l);
+        wSVar = w.lagBackVar(l);
+        wSCov = w.laggedVariance(l);
+        wj = w.laggedAutoCorr(l);
+        // Collect error factors
+        eMu = 1-wMu/rMu;
+        eSVar = 1-wSVar/rSVar;
+        eSCov = 1-wSCov/rSCov;
+        ej = 1-wj/rj;
+        // Output, with err values if necessary
+        cout << l         << "\t" << 1000-l << "\t" << wMu << "\t" << wSVar << "\t" << wSCov << "\t" << wj << endl;
+        if(eMu > 0.001 || eSVar > 0.05 || eSCov > 0.05 || ej > 0.05){
+        cout << "'-err: " << "\t" << 0      << "\t" << eMu << "\t" << eSVar << "\t" << eSCov << "\t" << ej << endl << endl;
+        }
+    }
+
+    results.close();
 
     cout << endl;
+    cout << endl;
 
-    cout << "Testing covariance" << endl;
+    cout << "Testing WelfordCoVar object:" << endl;
+    cout << endl;
 
+    WelfordStore* w1 = new WelfordStore();
     WelfordStore* w2 = new WelfordStore();
-    WelfordStore* w3 = new WelfordStore();
-    WelfordCoVar* wc = new WelfordCoVar(w3, w2);
+    WelfordCoVar* wc = new WelfordCoVar(w1, w2);
 
+    cout << "Left" << "\t" << "Right" << "\t" << "Running CoVariance" << endl;
+    w1->addPoint(1);
+    w2->addPoint(2);
+    cout << 1 << "\t" << 2 << "\t" << wc->corrCoeff() << endl;
+    w1->addPoint(2);
+    w2->addPoint(4);
+    cout << 2 << "\t" << 4 << "\t" << wc->corrCoeff() << endl;
+    w1->addPoint(3);
+    w2->addPoint(6);
+    cout << 3 << "\t" << 6 << "\t" << wc->corrCoeff() << endl;
+    w1->addPoint(4);
+    w2->addPoint(4);
+    cout << 4 << "\t" << 4 << "\t" << wc->corrCoeff() << endl;
+
+    // Delete a WelfordStore source, and the WelfordCoVar shouldn't segfault
+    delete w2;
+    wc->corrCoeff();
+    // Delete a WelfordCoVar listener, and the WelfordStore shouldn't segfault
+    delete wc;
+    w1->addPoint(0);
+    w1->mean();
+    delete w1;
+    cout << "Objects delete'd without segfaulting." << endl;
 
     return 0;
 }
