@@ -1,14 +1,12 @@
-FLAGS?=-g
+FLAGS?=-g -O0
 
-all: welford.o welfordtest.cpp
+test: welford.cpp welfordtest.cpp
 	g++ ${FLAGS} -Wall -pedantic -o welfordtest welford.cpp welfordtest.cpp
 
-c: welford.c
-	gcc --std=c99 -g -Wall -pedantic welford.c -o welfordtest
-	
-welford.o: welford.cpp
-	g++ ${FLAGS} -Wall -pedantic -c welford.cpp
+lib: welford.cpp
+	g++ ${FLAGS} -Wall -pedantic -c welford.cpp;ar rvs libwelford.a welford.o
 
 clean:
 	rm -f welfordtest
 	rm -f welford.o
+	rm -f libwelford.a

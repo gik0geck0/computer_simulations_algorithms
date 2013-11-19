@@ -1,0 +1,56 @@
+**********************************
+* COMPILATION
+**********************************
+
+On make-equipped systems, use the included Makefile.
+
+There are two targets:
+    test (builds a test executable)
+    lib (builds a .a static library file)
+    
+By default, both are built with debugging information and
+no optimization (-g -O0). As set the make variable FLAGS
+to "" to build without debugging information and with default
+optimization, or use whatever other flags you might think appropriate.
+
+After building lib, #include the welford.h file and link against the
+libwelford.a file in whatever manner is appropriate for your compiler.
+
+On systems without make, or in projects where having a separate
+Makefile for the library would be undesirable, the welford.cpp and
+welford.h files can simply be inserted into your source tree directly.
+
+
+
+**********************************
+* USAGE
+**********************************
+
+A WelfordStore object accepts data points and automatically
+calculates running averages, running variances, and running
+autocovariances to be retrieved later.
+
+Input:
+    ctor(int maxLag)      : Object will track lag of at most @lag steps
+    addPoint(double p)    : Inform the object of a new data point
+    
+Output:
+    mean()                : Calculated arithmetic mean of all added points
+    variance()            : Raw variance of all added points
+    stdDev()              : sqrt(variance())
+    laggedAutoCorr(int& l): Autocorrelation of data points separated by @lag; the input value @lag will be clamped and set to a value on [0, maxLag]
+    
+    
+A WelfordCoVar object tracks data points from two WelfordStore
+objects and automatically calculates the covariance between their
+data with a lag of 0. Points can be added asymmetrically to the
+WelfordStore objects, and will be buffered (but not used) until
+point(s) are added to the second WelfordStore to create pairs.
+
+Input:
+    ctor(WelfordStore* l, 
+         WelfordStore* r,): Object will be informed of data points added
+         to l and r, and automatically calculating running covariance
+
+Output:
+    corrCoeff()           : The correlation coefficient, r, between the data points added to @l and @r.
